@@ -26,15 +26,34 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Framework Repository
+
+This project uses the [NestJS framework](https://github.com/nestjs/nest).
+
+## OpenAI Repository
+
+This project also uses the [OpenAI Node.js client](https://github.com/openai/openai-node).
+
+### Setting Up Environment Variables
+
+To use the OpenAI and Telegram APIs, you need to set up your API keys and assistant ID. Create a `.env` file in the root directory of your project and add the following:
+
+
+OPENAI_API_KEY=your-openai-api-key
+TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+OPENAI_ASSISTANT_ID=your-openai-assistant-id
+ASSISTANT_ID=your-assistant-id
+
+
 ## Installation
 
-```bash
+
 $ npm install
-```
+
 
 ## Running the app
 
-```bash
+
 # development
 $ npm run start
 
@@ -43,11 +62,11 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
-```
+
 
 ## Test
 
-```bash
+
 # unit tests
 $ npm run test
 
@@ -56,7 +75,7 @@ $ npm run test:e2e
 
 # test coverage
 $ npm run test:cov
-```
+
 
 ## Support
 
