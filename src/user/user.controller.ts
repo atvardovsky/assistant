@@ -1,13 +1,14 @@
 import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
 import { UserService } from './user.service';
-import { TestUsers } from '../entity/test_users.entity';
+import { TestUsers } from '../entity/users.entity';
+import { CreateUserDto, UpdateUserDto } from './user.dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('register')
-  async register(@Body() createUserDto: { username: string; projectId: number }): Promise<TestUsers> {
+  async register(@Body() createUserDto: CreateUserDto): Promise<TestUsers> {
     return this.userService.create(createUserDto);
   }
 
@@ -22,7 +23,7 @@ export class UserController {
   }
 
   @Put(':userId')
-  async update(@Param('userId') userId: number, @Body() updateUserDto: { username?: string; projectId?: number }): Promise<TestUsers> {
+  async update(@Param('userId') userId: number, @Body() updateUserDto: UpdateUserDto): Promise<TestUsers> {
     return this.userService.update(userId, updateUserDto);
   }
 

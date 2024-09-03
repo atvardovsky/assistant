@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { TestUsers } from "./test_users.entity"; 
+import { TestUsers } from "./users.entity"; 
 import { TestConversations } from "./conversations.entity"; 
 import { TestBotConfigurations } from "./bot_configurations.entity"; 
 import { TestProfileFields } from "./profile_fields.entity"; 

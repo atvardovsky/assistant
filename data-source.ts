@@ -7,7 +7,7 @@ import { TestProfileFields } from "./src/entity/profile_fields.entity";
 import { TestProjects } from "./src/entity/projects.entity";
 import { TestUserPlatforms } from "./src/entity/user_platforms.entity";
 import { TestUserProfileFields } from "./src/entity/user_profile_fields.entity";
-import { TestUsers } from "./src/entity/test_users.entity";
+import { TestUsers } from "./src/entity/users.entity";
 
 export const AppDataSource = new DataSource({
     type: 'mysql',

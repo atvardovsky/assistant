@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
-import { TestUsers } from "./test_users.entity"; 
+import { TestUsers } from "./users.entity"; 
 import { TestProjects } from "./projects.entity";
 import { TestMessages } from "./messages.entity";
 
