@@ -31,32 +31,3 @@ export const AppDataSource = new DataSource({
     synchronize: false,
     logging: true,
 });
-
-
-// @Module({
-//   imports: [
-//     AppConfigModule,
-//     TypeOrmModule.forRootAsync({
-//       imports: [AppConfigModule],
-//       useFactory: (ConfigService: AppConfigService) => ({
-//         type: 'mysql',
-//         host: ConfigService.databaseHost,
-//         port: ConfigService.databasePort,
-//         username: ConfigService.databaseUser,
-//         password: ConfigService.databasePassword,
-//         database: ConfigService.databaseName,
-//         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-//         synchronize: false,
-//       }),
-//       inject: [AppConfigService]
-//     }),
-//     OpenAIModule,
-//     TelegramModule,
-//     UserModule,
-//     ProjectModule,
-//     BotConfigurationModule,
-//   ],
-//   controllers: [AppController],
-//   providers: [AppService],
-// })
-// export class AppModule {}
