@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
-import { TestProjects } from "./test_projects"; 
-import { TestUserPlatforms } from "./test_user_platforms"; 
-import { TestConversations } from "./test_conversations"; 
-import { TestUserProfileFields } from "./test_user_profile_fields";
+import { TestProjects } from "./projects.entity"; 
+import { TestUserPlatforms } from "./user_platforms.entity"; 
+import { TestConversations } from "./conversations.entity"; 
+import { TestUserProfileFields } from "./user_profile_fields.entity";
 
 @Entity({ name: "test_users" })
 export class TestUsers {

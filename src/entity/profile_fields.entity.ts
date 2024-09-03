@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
-import { TestProjects } from "./test_projects"; 
-import { TestUserProfileFields } from "./test_user_profile_fields"; 
+import { TestProjects } from "./projects.entity"; 
+import { TestUserProfileFields } from "./user_profile_fields.entity"; 
 
 @Entity({ name: "test_profile_fields" })
 export class TestProfileFields {

@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { TestUsers } from "./test_users"; 
-import { TestConversations } from "./test_conversations"; 
-import { TestBotConfigurations } from "./test_bot_configurations"; 
-import { TestProfileFields } from "./test_profile_fields"; 
+import { TestUsers } from "./test_users.entity"; 
+import { TestConversations } from "./conversations.entity"; 
+import { TestBotConfigurations } from "./bot_configurations.entity"; 
+import { TestProfileFields } from "./profile_fields.entity"; 
 
 @Entity({ name: "test_projects" })
 export class TestProjects {

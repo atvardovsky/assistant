@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
-import { TestProjects } from "./test_projects";
+import { TestProjects } from "./projects.entity";
 
 @Entity({ name: "test_bot_configurations" })
 export class TestBotConfigurations {

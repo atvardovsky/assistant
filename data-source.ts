@@ -1,14 +1,13 @@
 import { DataSource } from "typeorm";
-import { TestBotConfigurations } from "./src/entity/test_bot_configurations";
-import { TestConversations } from "./src/entity/test_conversations";
-import { TestLogs } from "./src/entity/test_logs";
-import { TestMessages } from "./src/entity/test_messages";
-import { TestProfileFields } from "./src/entity/test_profile_fields";
-import { TestProjects } from "./src/entity/test_projects";
-import { TestUserPlatforms } from "./src/entity/test_user_platforms";
-import { TestUserProfileFields } from "./src/entity/test_user_profile_fields";
-import { TestUsers } from "./src/entity/test_users";
-
+import { TestBotConfigurations } from "./src/entity/bot_configurations.entity";
+import { TestConversations } from "./src/entity/conversations.entity";
+import { TestLogs } from "./src/entity/logs.entity";
+import { TestMessages } from "./src/entity/messages.entity";
+import { TestProfileFields } from "./src/entity/profile_fields.entity";
+import { TestProjects } from "./src/entity/projects.entity";
+import { TestUserPlatforms } from "./src/entity/user_platforms.entity";
+import { TestUserProfileFields } from "./src/entity/user_profile_fields.entity";
+import { TestUsers } from "./src/entity/test_users.entity";
 
 export const AppDataSource = new DataSource({
     type: 'mysql',
@@ -28,7 +27,36 @@ export const AppDataSource = new DataSource({
         TestProfileFields,
         TestUserProfileFields
     ],
-    migrations: ['src/migration/**/*.ts'],
+    migrations: ['src/migration/**/*.ts'], // Ensure this matches where migrations are generated
     synchronize: false,
     logging: true,
-})
+});
+
+
+// @Module({
+//   imports: [
+//     AppConfigModule,
+//     TypeOrmModule.forRootAsync({
+//       imports: [AppConfigModule],
+//       useFactory: (ConfigService: AppConfigService) => ({
+//         type: 'mysql',
+//         host: ConfigService.databaseHost,
+//         port: ConfigService.databasePort,
+//         username: ConfigService.databaseUser,
+//         password: ConfigService.databasePassword,
+//         database: ConfigService.databaseName,
+//         entities: [__dirname + '/**/*.entity{.ts,.js}'],
+//         synchronize: false,
+//       }),
+//       inject: [AppConfigService]
+//     }),
+//     OpenAIModule,
+//     TelegramModule,
+//     UserModule,
+//     ProjectModule,
+//     BotConfigurationModule,
+//   ],
+//   controllers: [AppController],
+//   providers: [AppService],
+// })
+// export class AppModule {}

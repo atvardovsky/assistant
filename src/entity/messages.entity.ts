@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
-import { TestConversations } from "./test_conversations";
+import { TestConversations } from "./conversations.entity";
 
 @Entity({ name: "test_messages" })
 export class TestMessages {
