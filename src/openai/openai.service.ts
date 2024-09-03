@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from 'redis';
 import OpenAI from 'openai';
-import { TestUsers } from '../entity/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { TestUsers } from '../entity/users.entity';
 import { TestUserPlatforms } from 'src/entity/user_platforms.entity';
+import { PlatformService } from 'src/platform/platform.service'; 
 
 @Injectable()
 export class OpenAIService {
@@ -13,18 +14,18 @@ export class OpenAIService {
   private assistantId: string;
   private redisClient;
 
-
   constructor(
     private readonly configService: ConfigService,
-    @InjectRepository(TestUserPlatforms)
-    private readonly userPlatformsRepository: Repository<TestUserPlatforms>,
+    private readonly platformService: PlatformService,
     @InjectRepository(TestUsers)
     private readonly usersRepository: Repository<TestUsers>,
+    @InjectRepository(TestUserPlatforms)
+    private readonly userPlatformsRepository: Repository<TestUserPlatforms>, // Добавляем это свойство
   ) {
     this.initializeOpenAIClient();
     this.initializeRedisClient();
   }
-
+  
   private initializeRedisClient() {
     this.redisClient = createClient();
     this.redisClient.connect();
@@ -104,39 +105,28 @@ export class OpenAIService {
     return 'No content available after retries';
   }
 
-  private async findUserByPlatformId(platformId: string): Promise<TestUsers | null> {
-    const userPlatform = await this.userPlatformsRepository.findOne({ where: { platformUserId: platformId } });
-    return userPlatform ? this.usersRepository.findOne({ where: { userId: userPlatform.userId } }) : null;
-  }
-
   public async registerUser(platformId: string, username: string): Promise<string> {
-    try {
-      const existingUser = await this.findUserByPlatformId(platformId);
-      if (existingUser) {
-        return 'User already registered.';
-      }
-  
-      const newUser = new TestUsers();
-      newUser.username = username;
-      newUser.projectId = 1;
-      newUser.createdAt = new Date();
-      newUser.updatedAt = new Date();
-  
-      await this.usersRepository.save(newUser);
-  
-      const newUserPlatform = new TestUserPlatforms();
-      newUserPlatform.userId = newUser.userId;
-      newUserPlatform.platform = 'Telegram';
-      newUserPlatform.platformUserId = platformId;
-      newUserPlatform.createdAt = new Date();
-      newUserPlatform.updatedAt = new Date();
-  
-      await this.userPlatformsRepository.save(newUserPlatform);
-  
-      return 'User registered successfully.';
-    } catch (error) {
-      console.error('Error registering user:', error);
-      return 'An error occurred while registering the user.';
+    const existingUser = await this.platformService.findByPlatformId(platformId);
+    if (existingUser) {
+      return 'User already registered.';
     }
-  }  
+
+    const newUser = new TestUsers();
+    newUser.username = username;
+    newUser.projectId = 1;
+    newUser.createdAt = new Date();
+    newUser.updatedAt = new Date();
+
+    await this.usersRepository.save(newUser);
+
+    const newUserPlatform = {
+      userId: newUser.userId,
+      platform: 'Telegram',
+      platformUserId: platformId,
+    };
+
+    await this.platformService.create(newUserPlatform);
+
+    return 'User registered successfully.';
+  } 
 }

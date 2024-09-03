@@ -9,6 +9,7 @@ import { AppConfigService } from './config/config.service';
 import { UserModule } from './user/user.module';
 import { ProjectModule } from './project/project.module';
 import { BotConfigurationModule } from './bot-configuration/bot-configuration.module';
+import { PlatformModule } from './platform/project.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { BotConfigurationModule } from './bot-configuration/bot-configuration.mo
     TelegramModule,
     UserModule,
     ProjectModule,
+    PlatformModule,
     BotConfigurationModule,
   ],
   controllers: [AppController],
