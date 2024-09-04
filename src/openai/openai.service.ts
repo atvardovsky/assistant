@@ -105,28 +105,28 @@ export class OpenAIService {
     return 'No content available after retries';
   }
 
-  public async registerUser(platformId: string, username: string): Promise<string> {
-    const existingUser = await this.platformService.findByPlatformId(platformId);
+  public async registerUser(platformUserId: string, username: string): Promise<TestUsers> {
+    const existingUser = await this.platformService.findByPlatformId(platformUserId);
     if (existingUser) {
-      return 'User already registered.';
+      throw new Error('User already registered.');
     }
-
+  
     const newUser = new TestUsers();
     newUser.username = username;
     newUser.projectId = 1;
     newUser.createdAt = new Date();
     newUser.updatedAt = new Date();
-
+  
     await this.usersRepository.save(newUser);
-
+  
     const newUserPlatform = {
       userId: newUser.userId,
       platform: 'Telegram',
-      platformUserId: platformId,
+      platformUserId: platformUserId,
     };
-
+  
     await this.platformService.create(newUserPlatform);
-
-    return 'User registered successfully.';
-  } 
+  
+    return newUser;
+  }  
 }

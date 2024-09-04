@@ -25,13 +25,13 @@ export class TelegramService implements OnModuleInit {
     this.telegramBot.command('register', async (ctx) => {
       const userId = ctx.from.id.toString();
       const name = ctx.message.text.split(' ').slice(1).join(' ');
-
+    
       if (!name) {
         return ctx.reply('Please provide your name. Usage: /register <your_name>');
       }
-
-      const response = await this.assistantService.registerUser(userId, name);
-      ctx.reply(response);
+    
+      const user = await this.assistantService.registerUser(userId, name);
+      ctx.reply(`User ${user.username} registered successfully!`);
     });
 
     this.telegramBot.on('text', async (ctx) => {
