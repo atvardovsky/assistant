@@ -2,12 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TestUsers } from '../entity/users.entity';
+import { TestUserPlatforms } from 'src/entity/user_platforms.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(TestUsers)
     private readonly userRepository: Repository<TestUsers>,
+    @InjectRepository(TestUserPlatforms)
+    private readonly platformRepository: Repository<TestUserPlatforms>,
   ) {}
 
   async create(createUserDto: { username: string; projectId: number }): Promise<TestUsers> {
@@ -31,6 +34,7 @@ export class UserService {
   }
 
   async remove(userId: number): Promise<void> {
+    await this.platformRepository.delete({ userId });
     await this.userRepository.delete(userId);
   }
 }

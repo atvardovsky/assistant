@@ -8,6 +8,6 @@ import { PlatformController } from './platform.controller';
   imports: [TypeOrmModule.forFeature([TestUserPlatforms])],
   providers: [PlatformService],
   controllers: [PlatformController],
-  exports: [PlatformService],
+  exports: [PlatformService, TypeOrmModule.forFeature([TestUserPlatforms])],
 })
 export class PlatformModule {}
