@@ -17,6 +17,11 @@ export class PlatformController {
     return this.platformService.findByUserId(userId);
   }
 
+  @Get('platform/:userPlatformId')
+  async findByUserPlatformId(@Param('userPlatformId') userPlatformId: number): Promise<TestUserPlatforms | null> {
+    return this.platformService.findByUserPlatformId(userPlatformId);
+  }
+
   @Put(':platformId')
   async update(@Param('platformId') platformId: number, @Body() updatePlatformDto: UpdatePlatformDto): Promise<TestUserPlatforms> {
     return this.platformService.update(platformId, updatePlatformDto);

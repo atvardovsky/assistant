@@ -25,6 +25,10 @@ export class PlatformService {
     return this.platformRepository.findOne({ where: { platformUserId } });
   }
 
+  async findByUserPlatformId(userPlatformId: number): Promise<TestUserPlatforms | null> {
+    return this.platformRepository.findOne({ where: { userPlatformId } });
+  }
+
   async update(platformId: number, updatePlatformDto: { platform?: string; platformUserId?: string }): Promise<TestUserPlatforms> {
     await this.platformRepository.update(platformId, updatePlatformDto);
     return this.platformRepository.findOne({ where: { userPlatformId: platformId } });
