@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common'
 import { ProjectService } from './project.service';
 import { TestProjects } from '../entity/projects.entity';
 import { CreateProjectDto, UpdateProjectDto } from './project.dto';
+import { TestUsers } from 'src/entity/users.entity';
 
 @Controller('projects')
 export class ProjectController {
@@ -15,6 +16,16 @@ export class ProjectController {
   @Get(':projectId')
   async findById(@Param('projectId') projectId: number): Promise<TestProjects> {
     return this.projectService.findById(projectId);
+  }
+
+  @Get()
+  async findAll(): Promise<TestProjects[]> {
+    return this.projectService.findAll();
+  }
+
+  @Get(':projectId/users')
+  async findUsersByProjectId(@Param('projectId') projectId: number): Promise<TestUsers[]> {
+    return this.projectService.findUsersByProjectId(projectId);
   }
 
   @Put(':projectId')
