@@ -38,4 +38,16 @@ export class BotConfigurationService {
       throw new NotFoundException(`Configuration with ID ${configId} not found`);
     }
   }
+
+  async findAll(): Promise<TestBotConfigurations[]> {
+    return this.botConfigRepository.find();
+  }
+
+  async findByProjectId(projectId: number): Promise<TestBotConfigurations[]> {
+    const configs = await this.botConfigRepository.find({ where: { projectId } });
+    if (configs.length === 0) {
+      throw new NotFoundException(`No configurations found for project ID ${projectId}`);
+    }
+    return configs;
+  }
 }

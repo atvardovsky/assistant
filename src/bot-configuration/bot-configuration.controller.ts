@@ -17,6 +17,16 @@ export class BotConfigurationController {
     return this.botConfigurationService.findById(configId);
   }
 
+  @Get()
+  async findAll(): Promise<TestBotConfigurations[]> {
+    return this.botConfigurationService.findAll();
+  }
+
+  @Get('project/:projectId')
+  async findByProjectId(@Param('projectId', ParseIntPipe) projectId: number): Promise<TestBotConfigurations[]> {
+    return this.botConfigurationService.findByProjectId(projectId);
+  }
+
   @Put(':configId')
   async update(@Param('configId', ParseIntPipe) configId: number, @Body() updateBotConfigDto: UpdateBotConfigurationDto): Promise<TestBotConfigurations> {
     return this.botConfigurationService.update(configId, updateBotConfigDto);
