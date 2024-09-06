@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { TestUsers } from '../entity/users.entity';
 import { TestUserPlatforms } from 'src/entity/user_platforms.entity';
 import { PlatformService } from 'src/platform/platform.service'; 
+import { TestBotConfigurations } from 'src/entity/bot_configurations.entity';
 
 @Injectable()
 export class OpenAIService {
@@ -20,7 +21,9 @@ export class OpenAIService {
     @InjectRepository(TestUsers)
     private readonly usersRepository: Repository<TestUsers>,
     @InjectRepository(TestUserPlatforms)
-    private readonly userPlatformsRepository: Repository<TestUserPlatforms>, // Добавляем это свойство
+    private readonly userPlatformsRepository: Repository<TestUserPlatforms>,
+    @InjectRepository(TestBotConfigurations)
+    private readonly botConfigRepository: Repository<TestBotConfigurations>,
   ) {
     this.initializeOpenAIClient();
     this.initializeRedisClient();
@@ -31,11 +34,19 @@ export class OpenAIService {
     this.redisClient.connect();
   }
 
-  private initializeOpenAIClient() {
-    this.openai = new OpenAI({
-      apiKey: this.configService.get('OPENAI_API_KEY'),
+  private async initializeOpenAIClient() {
+    const botConfig = await this.botConfigRepository.findOne({
+      where: { projectId: 1 },
     });
-    this.assistantId = this.configService.get('ASSISTANT_ID');
+
+    if (!botConfig) {
+      throw new Error('Bot configuration not found in the database.');
+    }
+
+    this.openai = new OpenAI({
+      apiKey: botConfig.apiKey,
+    });
+    this.assistantId = botConfig.assistantId;
   }
 
   public async sendMessageToAssistant(message: string, userId: string): Promise<string> {

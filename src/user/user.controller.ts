@@ -68,6 +68,19 @@ export class UserController {
     }
   }
 
+  @Get()
+  async findAll(): Promise<TestUsers[]> {
+    try {
+      const users = await this.userService.findAll();
+      return users;
+    } catch (error) {
+      throw new HttpException(
+        { status: HttpStatus.INTERNAL_SERVER_ERROR, error: error.message },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   @Put(':userId')
   async update(@Param('userId') userId: number, @Body() updateUserDto: UpdateUserDto): Promise<TestUsers> {
     try {

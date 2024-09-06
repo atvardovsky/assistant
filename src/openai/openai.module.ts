@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TestUsers } from 'src/entity/users.entity';
 import { TestUserPlatforms } from 'src/entity/user_platforms.entity';
 import { PlatformModule } from 'src/platform/project.module';
+import { TestBotConfigurations } from 'src/entity/bot_configurations.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TestUsers, TestUserPlatforms]),
+    TypeOrmModule.forFeature([TestUsers, TestUserPlatforms, TestBotConfigurations]),
     HttpModule,
     PlatformModule,
   ],

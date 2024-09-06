@@ -37,4 +37,8 @@ export class UserService {
     await this.platformRepository.delete({ userId });
     await this.userRepository.delete(userId);
   }
+
+  async findAll(): Promise<TestUsers[]> {
+    return this.userRepository.find();
+  }
 }
