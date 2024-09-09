@@ -12,6 +12,9 @@ export class TestUsers {
   @Column({ length: 255 })
   username: string;
 
+  @Column({ name: "password" })
+  password: string;
+
   @Column({ name: "project_id" })
   projectId: number;
 

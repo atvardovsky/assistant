@@ -3,9 +3,10 @@ import { AssistantService } from './assistant.service';
 import { AssistantController } from './assistant.controller';
 import { OpenAIModule } from '../openai/openai.module';
 import { UserModule } from '../user/user.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [OpenAIModule, UserModule],
+  imports: [OpenAIModule, UserModule, AuthModule],
   providers: [AssistantService],
   controllers: [AssistantController],
   exports: [AssistantService],

@@ -5,6 +5,10 @@ export class CreateUserDto {
   @IsString()
   username: string;
 
+  @IsString()
+  @IsNotEmpty()
+  readonly password: string;
+
   @IsNotEmpty()
   @IsNumber()
   projectId: number;
@@ -14,6 +18,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   username?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly password: string;
 
   @IsOptional()
   @IsNumber()
