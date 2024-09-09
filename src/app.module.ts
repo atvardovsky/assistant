@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { ProjectModule } from './project/project.module';
 import { BotConfigurationModule } from './bot-configuration/bot-configuration.module';
 import { PlatformModule } from './platform/project.module';
+import { AssistantModule } from './assistant-module/assistant.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PlatformModule } from './platform/project.module';
     ProjectModule,
     PlatformModule,
     BotConfigurationModule,
+    AssistantModule,
   ],
   controllers: [AppController],
   providers: [AppService],
