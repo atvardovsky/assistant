@@ -4,7 +4,7 @@ import { TestUsers } from '../entity/users.entity';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { OpenAIModule } from 'src/openai/openai.module';
-import { PlatformModule } from 'src/platform/project.module';
+import { PlatformModule } from 'src/platform/platform.module';
 
 @Module({
   imports: [

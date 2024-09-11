@@ -26,7 +26,7 @@ export class AuthService {
     };
   }
   
-  getUserIdFromToken(token: string): number {
+  async getUserIdFromToken(token: string): Promise<number> {
     const decoded = this.jwtService.verify(token);
     return decoded.sub;
   }

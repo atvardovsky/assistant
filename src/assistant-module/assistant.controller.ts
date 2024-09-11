@@ -1,8 +1,12 @@
-import { Controller, Post, Body, HttpException, HttpStatus, UseGuards, UnauthorizedException, Req } from '@nestjs/common';
-import { AssistantService } from './assistant.service'; 
+// assistant.controller.ts
+import { Controller, Post, Body, HttpException, HttpStatus, UseGuards, UnauthorizedException, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { AssistantService } from './assistant.service';
 import { CreateUserDto } from '../user/user.dto';
-import { AuthService } from 'src/auth/auth.service';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { AuthService } from '../auth/auth.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
+import { SendMessageDto, SendFileDto } from './assistant.dto';
 
 @Controller('assistant')
 export class AssistantController {
@@ -23,16 +27,16 @@ export class AssistantController {
   @UseGuards(JwtAuthGuard)
   @Post('message')
   async sendMessage(
-    @Body() body: { message: string },
+    @Body() sendMessageDto: SendMessageDto,
     @Req() request: any,
   ): Promise<{ response: string }> {
     try {
-      const { message } = body;
+      const { message } = sendMessageDto;
       const token = request.headers.authorization?.split(' ')[1];
       if (!token) {
         throw new UnauthorizedException('No token provided');
       }
-      const userId = this.authService.getUserIdFromToken(token);
+      const userId = await this.authService.getUserIdFromToken(token);
       const response = await this.assistantService.sendMessage(userId, message);
       return { response };
     } catch (error) {
@@ -52,6 +56,30 @@ export class AssistantController {
       throw new HttpException(
         error.message || 'Conflict',
         error.status || HttpStatus.CONFLICT,
+      );
+    }
+  }
+
+  @Post('send-file')
+  @UseInterceptors(FileInterceptor('file'))
+  async sendFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() sendFileDto: SendFileDto,
+    @Req() request: any
+  ): Promise<{ response: string }> {
+    try {
+      const { message } = sendFileDto;
+      const token = request.headers.authorization?.split(' ')[1];
+      if (!token) {
+        throw new UnauthorizedException('No token provided');
+      }
+      const userId = await this.authService.getUserIdFromToken(token);
+      const response = await this.assistantService.sendFileToAssistant(file.stream, file.originalname, message, userId.toString());
+      return { response };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Internal Server Error',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
