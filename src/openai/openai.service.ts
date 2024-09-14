@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from 'redis';
+import { File } from 'node:buffer';
 import OpenAI from 'openai';
 
 @Injectable()
@@ -76,23 +77,70 @@ export class OpenAIService {
   }
 
   private async createThread(): Promise<string> {
-    const response = await this.openai.beta.threads.create();
-    return response.id;
+    const thread = await this.openai.beta.threads.create();
+    return thread.id;
   }
 
   private async waitForResponse(threadId: string, maxRetries = 5, retryInterval = 2000): Promise<string> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       const messages = await this.openai.beta.threads.messages.list(threadId);
-      const assistantMessages = messages.data?.filter(message => message.role === 'assistant') || [];
-      if (assistantMessages.length > 0) {
-        const latestMessage = assistantMessages[assistantMessages.length - 1];
-        return typeof latestMessage.content === 'string' ? latestMessage.content : JSON.stringify(latestMessage.content);
-      }
-
-      if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, retryInterval));
-      }
+      const content = messages.data[0].content[0];
+      return content.type === 'text' ? content.text.value : 'Non-text response received';
     }
     return 'No content available after retries';
   }
-}
+
+  private async waitForRunCompletion(threadId: string, runId: string): Promise<string> {
+    let run;
+    do {
+      run = await this.openai.beta.threads.runs.retrieve(threadId, runId);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second before checking again
+    } while (run.status !== 'completed');
+  
+    const messages = await this.openai.beta.threads.messages.list(threadId);
+    const content = messages.data[0].content[0];
+    return content.type === 'text' ? content.text.value : 'Non-text response received';
+  }
+
+  async processFile(fileBuffer: Buffer, fileName: string, userId: string): Promise<string> {
+    // Create a File object from the Buffer
+    const file = new File([fileBuffer], fileName, { type: 'application/octet-stream' });
+
+    let userRedisId = this.configService.get('PROJECT_NAME')+ '_' + userId;
+
+    let threadId = await this.redisClient.get(userRedisId);
+
+    if(!threadId)
+    {
+        threadId = await this.createThread();
+        await this.redisClient.set(userRedisId, threadId);
+    }
+    // Upload the file to OpenAI
+    const uploadedFile = await this.openai.files.create({
+      file: file,
+      purpose: 'assistants',
+    });
+    console.log(uploadedFile);
+
+    // Add the file to the thread
+    await this.openai.beta.threads.messages.create(threadId, {
+      role: 'user',
+      content: [
+        { type: 'text', text: `I've uploaded a file named ${fileName}. Please analyze it aaccording your instructions and use my language` },
+        { 
+          type: 'image_file', 
+          image_file: { file_id: uploadedFile.id }
+        }
+      ],
+    });
+
+    // Run the assistant
+    const run = await this.openai.beta.threads.runs.create(threadId, {
+      assistant_id: this.assistantId,
+    });
+
+    // Wait for the run to complete and get the response
+    const response = await this.waitForRunCompletion(threadId, run.id);
+
+    return response;
+  }}

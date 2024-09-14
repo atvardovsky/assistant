@@ -28,6 +28,43 @@ export class TelegramService implements OnModuleInit {
       ctx.reply(response);
     });
 
+    this.telegramBot.on('photo', async (ctx) => {
+      const photo = ctx.message.photo[ctx.message.photo.length - 1];
+      const fileId = photo.file_id;
+      const fileUrl = await ctx.telegram.getFileLink(fileId);
+      
+      // Extract the file extension from the URL
+      const fileExtension = fileUrl.pathname.split('.').pop();
+      const fileName = `image_${Date.now()}.${fileExtension}`;
+    
+      // Download the file
+      const response = await fetch(fileUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      const fileBuffer = Buffer.from(arrayBuffer);
+    
+      // Process the file using OpenAI API
+      const result = await this.assistantService.processFile(fileBuffer, fileName, ctx.from.id.toString());
+      
+      ctx.reply(result);
+    });
+
+    this.telegramBot.on('document', async (ctx) => {
+      console.log('FILE RECEIVED');
+      const fileId = ctx.message.document.file_id;
+      const fileName = ctx.message.document.file_name;
+      const fileUrl = await ctx.telegram.getFileLink(fileId);
+      
+      // Download the file
+      const response = await fetch(fileUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      const fileBuffer = Buffer.from(arrayBuffer);
+    
+      // Process the file using OpenAI API
+      const result = await this.assistantService.processFile(fileBuffer, fileName, ctx.from.id.toString());
+      
+      ctx.reply(result);
+    });
+
     this.telegramBot.launch();
   }
 }
