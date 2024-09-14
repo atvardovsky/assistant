@@ -29,12 +29,14 @@ export class OpenAIService {
 
   public async sendMessageToAssistant(message: string, userId: string): Promise<string> {
 
-    let threadId = await this.redisClient.get(userId);
+    let userRedisId = this.configService.get('PROJECT_NAME')+ '_' + userId;
+
+    let threadId = await this.redisClient.get(userRedisId);
 
     if(!threadId)
     {
         threadId = await this.createThread();
-        await this.redisClient.set(userId, threadId);
+        await this.redisClient.set(userRedisId, threadId);
     }
 
     await this.openai.beta.threads.messages.create(threadId, {
