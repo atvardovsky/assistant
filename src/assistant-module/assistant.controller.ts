@@ -1,4 +1,3 @@
-// assistant.controller.ts
 import { Controller, Post, Body, HttpException, HttpStatus, UseGuards, UnauthorizedException, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { AssistantService } from './assistant.service';
 import { CreateUserDto } from '../user/user.dto';
@@ -68,13 +67,14 @@ export class AssistantController {
     @Req() request: any
   ): Promise<{ response: string }> {
     try {
-      const { message } = sendFileDto;
+      const { message = '' } = sendFileDto; // Default to empty string if message is not provided
       const token = request.headers.authorization?.split(' ')[1];
       if (!token) {
         throw new UnauthorizedException('No token provided');
       }
       const userId = await this.authService.getUserIdFromToken(token);
-      const response = await this.assistantService.sendFileToAssistant(file.stream, file.originalname, message, userId.toString());
+      // Use file.buffer instead of file.stream
+      const response = await this.assistantService.processFile(file.buffer, file.originalname, message, userId.toString());
       return { response };
     } catch (error) {
       throw new HttpException(

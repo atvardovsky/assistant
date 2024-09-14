@@ -57,11 +57,15 @@ export class OpenAIService {
   }
 
   public async sendMessageToAssistant(message: string, userId: string): Promise<string> {
-    let threadId = await this.redisClient.get(userId);
 
-    if (!threadId) {
-      threadId = await this.createThread();
-      await this.redisClient.set(userId, threadId);
+    let userRedisId = this.configService.get('PROJECT_NAME')+ '_' + userId;
+
+    let threadId = await this.redisClient.get(userRedisId);
+
+    if(!threadId)
+    {
+        threadId = await this.createThread();
+        await this.redisClient.set(userRedisId, threadId);
     }
 
     await this.openai.beta.threads.messages.create(threadId, {
@@ -75,115 +79,106 @@ export class OpenAIService {
     });
 
     let status = 'start';
-    while (status !== 'completed') {
-      let run_response = await this.openai.beta.threads.runs.retrieve(threadId, run.id);
-      status = run_response.status;
-      if (status === 'failed') {
-        throw new Error('Assistant run failed');
+      while( 'completed' != status)
+      {
+        let run_response = await this.openai.beta.threads.runs.retrieve(
+            threadId,
+             run.id
+           );
+           status = run_response.status;
+
+           if (status === 'failed') {
+            throw new Error('Assistant run failed');
+          }
       }
-    }
 
-    const messages = await this.openai.beta.threads.messages.list(threadId, {
-      query: 'order=created_at:desc',
-    });
-
+    const messages = await this.openai.beta.threads.messages.list(
+        threadId,
+        {query: 'order=created_at:desc'}
+      );
+      
     const lastMessage = messages.data[0];
-    let textResponse = '';
+
+    let textReponse = '';
+    
 
     if (lastMessage.content[0]?.type === 'text') {
-      textResponse = lastMessage.content[0].text.value;
+      textReponse = lastMessage.content[0].text.value;
     }
 
-    return textResponse;
-  }
-
-  public async sendFileToAssistant(fileStream: Readable, fileName: string, message: string, userId: string): Promise<string> {
-    let threadId = await this.redisClient.get(userId);
-
-    if (!threadId) {
-      threadId = await this.createThread();
-      await this.redisClient.set(userId, threadId);
-    }
-
-    // Send message first
-    if (message.trim()) {
-      await this.openai.beta.threads.messages.create(threadId, {
-        role: 'user',
-        content: message,
-      });
-    }
-
-    try {
-      const fileBuffer = await streamToBuffer(fileStream);
-
-      // Check file size and handle errors
-      const maxSize = 25 * 1024 * 1024; // 25 MB size limit
-      if (fileBuffer.length > maxSize) {
-        return 'File size exceeds the limit. Please upload a smaller file.';
-      }
-
-      // Save the file temporarily to handle the upload
-      const tempFilePath = path.join(__dirname, 'tempFile');
-      fs.writeFileSync(tempFilePath, fileBuffer);
-
-      const fileStreamForUpload = fs.createReadStream(tempFilePath);
-
-      // Upload the file to OpenAI
-      const fileResponse = await this.openai.files.create({
-        file: fileStreamForUpload,
-        purpose: 'vision', // Use 'vision' for image files
-      });
-
-      const fileId = fileResponse.id;
-
-      // Add context message for the file
-      await this.openai.beta.threads.messages.create(threadId, {
-        role: 'user',
-        content: `The uploaded file ${fileName} has been processed.`,
-      });
-
-      // Send a request to analyze the file
-      const runResponse = await this.openai.beta.threads.runs.create(threadId, {
-        assistant_id: this.assistantId,
-        additional_instructions: 'Analyze the attached file and respond accordingly.',
-      });
-
-      let status = 'start';
-      while (status !== 'completed') {
-        let run_response = await this.openai.beta.threads.runs.retrieve(threadId, runResponse.id);
-        status = run_response.status;
-        if (status === 'failed') {
-          throw new Error('Assistant run failed');
-        }
-      }
-
-      const messages = await this.openai.beta.threads.messages.list(threadId, {
-        query: 'order=created_at:desc',
-      });
-
-      const lastMessage = messages.data[0];
-      let textResponse = '';
-
-      if (lastMessage.content[0]?.type === 'text') {
-        textResponse = lastMessage.content[0].text.value;
-      }
-
-      // Clean up the temporary file
-      fs.unlinkSync(tempFilePath);
-
-      return textResponse;
-
-    } catch (error) {
-      // Log detailed error for debugging
-      console.error('Error processing file:', error);
-      return 'An error occurred while processing the file.';
-    }
+    return textReponse;
   }
 
   private async createThread(): Promise<string> {
-    const response = await this.openai.beta.threads.create();
-    return response.id;
+    const thread = await this.openai.beta.threads.create();
+    return thread.id;
   }
+
+  private async waitForResponse(threadId: string, maxRetries = 5, retryInterval = 2000): Promise<string> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      const messages = await this.openai.beta.threads.messages.list(threadId);
+      const content = messages.data[0].content[0];
+      return content.type === 'text' ? content.text.value : 'Non-text response received';
+    }
+    return 'No content available after retries';
+  }
+  
+  private async waitForRunCompletion(threadId: string, runId: string): Promise<string> {
+    let run;
+    do {
+      run = await this.openai.beta.threads.runs.retrieve(threadId, runId);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second before checking again
+    } while (run.status !== 'completed');
+  
+    const messages = await this.openai.beta.threads.messages.list(threadId);
+    const content = messages.data[0].content[0];
+    return content.type === 'text' ? content.text.value : 'Non-text response received';
+  }
+
+  async processFile(fileBuffer: Buffer, fileName: string, userId: string): Promise<string> {
+
+    const file = new File([fileBuffer], fileName, { type: 'application/octet-stream' });
+    
+    let userRedisId = this.configService.get('PROJECT_NAME')+ '_' + userId;
+
+    let threadId = await this.redisClient.get(userRedisId);
+
+    if(!threadId)
+    {
+        threadId = await this.createThread();
+        await this.redisClient.set(userRedisId, threadId);
+    }
+
+    // Upload the file to OpenAI
+    const uploadedFile = await this.openai.files.create({
+      file: file,
+      purpose: 'assistants',
+    });
+    console.log(uploadedFile);
+
+    // Add the file to the thread
+    await this.openai.beta.threads.messages.create(threadId, {
+      role: 'user',
+      content: [
+        { type: 'text', text: `I've uploaded a file named ${fileName}. Please analyze it aaccording your instructions and use my language` },
+        { 
+          type: 'image_file', 
+          image_file: { file_id: uploadedFile.id }
+        }
+      ],
+    });
+
+    // Run the assistant
+    const run = await this.openai.beta.threads.runs.create(threadId, {
+      assistant_id: this.assistantId,
+    });
+    
+    // Wait for the run to complete and get the response
+    const response = await this.waitForRunCompletion(threadId, run.id);
+
+    return response;
+
+    }
 
   public async registerUser(platformUserId: string, username: string): Promise<TestUsers> {
     const existingUser = await this.platformService.findByPlatformId(platformUserId);
@@ -213,24 +208,5 @@ export class OpenAIService {
   public getUserIdFromToken(token: string): number {
     const decoded = this.jwtService.verify(token);
     return decoded.sub;
-  }
-
-  private async waitForResponse(threadId: string, maxRetries = 5, retryInterval = 2000): Promise<string> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      const messages = await this.openai.beta.threads.messages.list(threadId);
-      const assistantMessages = messages.data?.filter(message => message.role === 'assistant') || [];
-      if (assistantMessages.length > 0) {
-        const latestMessage = assistantMessages[assistantMessages.length - 1];
-        return typeof latestMessage.content === 'string'
-          ? latestMessage.content
-          : JSON.stringify(latestMessage.content);
-      }
-
-      if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, retryInterval));
-      }
-    }
-
-    return 'No content available after retries';
   }
 }

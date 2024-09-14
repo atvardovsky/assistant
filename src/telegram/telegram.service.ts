@@ -51,38 +51,41 @@ export class TelegramService implements OnModuleInit {
 
     this.telegramBot.on('photo', async (ctx) => {
       const userId = ctx.from.id.toString();
-      const fileId = ctx.message.photo[0].file_id;
+      const photo = ctx.message.photo[ctx.message.photo.length - 1];
+      const fileId = photo.file_id;
+      const fileUrl = await ctx.telegram.getFileLink(fileId);
 
-      try {
-        const fileLink = await this.telegramBot.telegram.getFileLink(fileId);
-        const response = await axios.get(fileLink.href, { responseType: 'stream' });
-        const fileStream = response.data;
-
-        const message = ctx.message.caption || '';
-
-        const textResponse = await this.assistantService.sendFileToAssistant(fileStream, fileId, message, userId);
-        ctx.reply(textResponse);
-      } catch (error) {
-        ctx.reply(`Error: ${error.message}`);
-      }
+      // Extract the file extension from the URL
+      const fileExtension = fileUrl.pathname.split('.').pop();
+      const fileName = `image_${Date.now()}.${fileExtension}`;
+          
+      // Download the file
+      const response = await fetch(fileUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      const fileBuffer = Buffer.from(arrayBuffer);
+          
+      // Process the file using OpenAI API
+      const result = await this.assistantService.processFile(fileBuffer, fileName, userId);
+            
+      ctx.reply(result);
     });
 
     this.telegramBot.on('document', async (ctx) => {
+      console.log('FILE RECEIVED');
       const userId = ctx.from.id.toString();
-      const file = ctx.message.document;
-      const fileId = file.file_id;
-      const fileName = file.file_name || `file_${Date.now()}`;
-      const fileMimeType = file.mime_type;
-      const fileUrl = await this.telegramBot.telegram.getFileLink(fileId);
+      const fileId = ctx.message.document.file_id;
+      const fileName = ctx.message.document.file_name;
+      const fileUrl = await ctx.telegram.getFileLink(fileId);
       
-      try {
-        const fileResponse = await axios.get(fileUrl.href, { responseType: 'stream' });
-        const fileStream = fileResponse.data;
-        const response = await this.assistantService.sendFileToAssistant(fileStream, fileName, `File received (${fileMimeType})`, userId);
-        ctx.reply(response);
-      } catch (error) {
-        ctx.reply(`Error processing file: ${error.message}`);
-      }
+      // Download the file
+      const response = await fetch(fileUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      const fileBuffer = Buffer.from(arrayBuffer);
+    
+      // Process the file using OpenAI API
+      const result = await this.assistantService.processFile(fileBuffer, fileName, userId);
+      
+      ctx.reply(result);
     });
 
     this.telegramBot.launch();

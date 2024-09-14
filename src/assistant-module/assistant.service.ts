@@ -4,12 +4,13 @@ import { CreateUserDto } from '../user/user.dto';
 import * as bcrypt from 'bcrypt';
 import { Readable } from 'stream';
 import { UserService } from 'src/user/user.service';
+import { streamToBuffer } from 'src/utils/streamToBuffer'; // Ensure correct import path
 
 @Injectable()
 export class AssistantService {
   constructor(
     private readonly openAIService: OpenAIService,
-    private readonly userService: UserService, // Keep as a dependency but handle interactions carefully
+    private readonly userService: UserService,
   ) {}
 
   async sendMessage(userId: number, message: string): Promise<string> {
@@ -31,7 +32,8 @@ export class AssistantService {
     return this.userService.create({ username, password: hashedPassword, projectId });
   }
 
-  async sendFileToAssistant(fileStream: Readable, fileName: string, message: string, userId: string): Promise<string> {
-    return this.openAIService.sendFileToAssistant(fileStream, fileName, message, userId);
+  async processFile(fileBuffer: Buffer, fileName: string, message: string, userId: string): Promise<string> {
+    // Process the file with OpenAI
+    return this.openAIService.processFile(fileBuffer, fileName, userId);
   }
 }
