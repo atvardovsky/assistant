@@ -7,10 +7,11 @@ import { TestUserPlatforms } from 'src/entity/user_platforms.entity';
 import { PlatformModule } from 'src/platform/platform.module';
 import { TestBotConfigurations } from 'src/entity/bot_configurations.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { TestMessages } from 'src/entity/messages.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TestUsers, TestUserPlatforms, TestBotConfigurations]),
+    TypeOrmModule.forFeature([TestUsers, TestUserPlatforms, TestBotConfigurations, TestMessages]),
     HttpModule,
     PlatformModule,
     JwtModule,

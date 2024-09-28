@@ -13,6 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Readable } from 'stream';
 import * as fs from 'fs';
 import * as path from 'path';
+import { TestMessages } from 'src/entity/messages.entity';
 
 @Injectable()
 export class OpenAIService {
@@ -30,6 +31,8 @@ export class OpenAIService {
     @InjectRepository(TestBotConfigurations)
     private readonly botConfigRepository: Repository<TestBotConfigurations>,
     private readonly jwtService: JwtService,
+    @InjectRepository(TestMessages)
+    private readonly messagesRepository: Repository<TestMessages>,
   ) {
     this.jwtService = jwtService;
     this.initializeOpenAIClient();
@@ -62,10 +65,13 @@ export class OpenAIService {
 
     let threadId = await this.redisClient.get(userRedisId);
 
+    let conversationId = 1;
+
     if(!threadId)
     {
         threadId = await this.createThread();
         await this.redisClient.set(userRedisId, threadId);
+        await this.saveThreadToDatabase(threadId, userId, conversationId);
     }
 
     await this.openai.beta.threads.messages.create(threadId, {
@@ -179,6 +185,18 @@ export class OpenAIService {
     return response;
 
     }
+
+  private async saveThreadToDatabase(threadId: string, userId: string, conversationId: number): Promise<void> {
+    const newMessage = new TestMessages(); // Create a new instance of TestMessages
+    newMessage.threadId = threadId; // Save the thread ID
+    newMessage.userId = Number(userId); // Save the user ID
+    newMessage.conversationId = conversationId; // Save the conversation ID
+    newMessage.sender = 'user'; // You can set this as needed
+    newMessage.status = 'sent'; // Adjust the status accordingly
+    newMessage.timestamp = new Date(); // Set the current timestamp
+  
+    await this.messagesRepository.save(newMessage); // Save to the database
+  }
 
   public async registerUser(platformUserId: string, username: string): Promise<TestUsers> {
     const existingUser = await this.platformService.findByPlatformId(platformUserId);

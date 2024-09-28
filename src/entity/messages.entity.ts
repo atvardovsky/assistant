@@ -9,14 +9,14 @@ export class TestMessages {
   @Column({ name: "conversation_id" })
   conversationId: number;
 
+  @Column({ name: "thread_id" }) // Поле для threadId
+  threadId: string; // Измените тип на string, если threadId является строкой
+
+  @Column({ name: "user_id" }) // Поле для userId
+  userId: number;
+
   @Column({ length: 50 })
   sender: string;
-
-  @Column("text")
-  content: string;
-
-  @Column({ name: "message_type", length: 50 })
-  messageType: string;
 
   @Column({ length: 50 })
   status: string;
