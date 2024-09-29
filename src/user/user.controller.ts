@@ -1,10 +1,11 @@
-import { Controller, Post, Body, Get, Param, Put, Delete, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { TestUsers } from '../entity/users.entity';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { OpenAIService } from 'src/openai/openai.service';
 import { PlatformService } from 'src/platform/platform.service';
 import { CreatePlatformDto } from 'src/platform/platform.dto';
+import { AdminGuard } from 'src/auth/admin.guard';
 
 @Controller('users')
 export class UserController {
@@ -69,6 +70,7 @@ export class UserController {
   }
 
   @Get()
+  @UseGuards(AdminGuard)
   async findAll(): Promise<TestUsers[]> {
     try {
       const users = await this.userService.findAll();
@@ -82,6 +84,7 @@ export class UserController {
   }
 
   @Put(':userId')
+  @UseGuards(AdminGuard)
   async update(@Param('userId') userId: number, @Body() updateUserDto: UpdateUserDto): Promise<TestUsers> {
     try {
       const updatedUser = await this.userService.update(userId, updateUserDto);
@@ -98,6 +101,7 @@ export class UserController {
   }
 
   @Delete(':userId')
+  @UseGuards(AdminGuard)
   async remove(@Param('userId') userId: number): Promise<void> {
     try {
       const user = await this.userService.findById(userId);

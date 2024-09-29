@@ -1,9 +1,11 @@
-import { Controller, Post, Body, Get, Param, Put, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { BotConfigurationService } from './bot-configuration.service';
 import { TestBotConfigurations } from '../entity/bot_configurations.entity';
 import { CreateBotConfigurationDto, UpdateBotConfigurationDto } from './bot-configuration.dto';
+import { AdminGuard } from 'src/auth/admin.guard';
 
 @Controller('bot-configurations')
+@UseGuards(AdminGuard)
 export class BotConfigurationController {
   constructor(private readonly botConfigurationService: BotConfigurationService) {}
 

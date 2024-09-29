@@ -1,10 +1,12 @@
-import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, UseGuards } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { TestProjects } from '../entity/projects.entity';
 import { CreateProjectDto, UpdateProjectDto } from './project.dto';
 import { TestUsers } from 'src/entity/users.entity';
+import { AdminGuard } from '../auth/admin.guard';
 
 @Controller('projects')
+@UseGuards(AdminGuard)
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 

@@ -1,9 +1,11 @@
-import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, UseGuards } from '@nestjs/common';
 import { PlatformService } from './platform.service';
 import { TestUserPlatforms } from '../entity/user_platforms.entity';
 import { CreatePlatformDto, UpdatePlatformDto } from './platform.dto';
+import { AdminGuard } from 'src/auth/admin.guard';
 
 @Controller('platforms')
+@UseGuards(AdminGuard)
 export class PlatformController {
   constructor(private readonly platformService: PlatformService) {}
 

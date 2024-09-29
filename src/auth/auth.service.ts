@@ -20,7 +20,11 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { username: user.username, sub: user.userId };
+    const payload = { 
+      username: user.username, 
+      sub: user.userId, 
+      isAdmin: user.isAdmin // Include isAdmin in the token
+    };
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -29,5 +33,9 @@ export class AuthService {
   async getUserIdFromToken(token: string): Promise<number> {
     const decoded = this.jwtService.verify(token);
     return decoded.sub;
+  }
+
+  async verifyToken(token: string): Promise<any> {
+    return this.jwtService.verify(token);
   }
 }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { OpenAIService } from './openai.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -13,7 +13,7 @@ import { TestMessages } from 'src/entity/messages.entity';
   imports: [
     TypeOrmModule.forFeature([TestUsers, TestUserPlatforms, TestBotConfigurations, TestMessages]),
     HttpModule,
-    PlatformModule,
+    forwardRef(() => PlatformModule),
     JwtModule,
   ],
   providers: [OpenAIService],

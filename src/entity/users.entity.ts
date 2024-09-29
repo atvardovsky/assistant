@@ -24,6 +24,9 @@ export class TestUsers {
   @Column({ type: "timestamp" })
   updatedAt: Date;
 
+  @Column({ default: false }) // Assuming a boolean field for admin status
+  isAdmin: boolean;
+
   @ManyToOne(() => TestProjects, (project) => project.users)
   @JoinColumn({ name: "project_id" })
   project: TestProjects;
