@@ -3,23 +3,33 @@ import { ConfigService } from '@nestjs/config';
 import { createClient } from 'redis';
 import OpenAI from 'openai';
 
+/**
+ * Service for managing OpenAI Assistant API interactions
+ * Handles thread management, message sending, and response retrieval
+ * Uses Redis to persist thread IDs per user for conversation continuity
+ */
 @Injectable()
 export class OpenAIService {
   private openai: OpenAI;
   private assistantId: string;
   private redisClient;
 
-
   constructor(private readonly configService: ConfigService) {
     this.initializeOpenAIClient();
     this.initializeRedisClient();
   }
 
+  /**
+   * Initializes Redis client for storing user-thread mappings
+   */
   private initializeRedisClient() {
     this.redisClient = createClient();
     this.redisClient.connect();
   }
 
+  /**
+   * Initializes OpenAI client with API key and assistant ID from environment
+   */
   private initializeOpenAIClient() {
     this.openai = new OpenAI({
       apiKey: this.configService.get('OPENAI_API_KEY'),
@@ -27,8 +37,13 @@ export class OpenAIService {
     this.assistantId = this.configService.get('ASSISTANT_ID');
   }
 
+  /**
+   * Sends a message to the OpenAI assistant and retrieves the response
+   * @param message - The user's message to send
+   * @param userId - Unique user identifier for thread persistence
+   * @returns The assistant's text response
+   */
   public async sendMessageToAssistant(message: string, userId: string): Promise<string> {
-
     let threadId = await this.redisClient.get(userId);
 
     if(!threadId)
@@ -64,8 +79,6 @@ export class OpenAIService {
 
     let textReponse = '';
 
-    
-
     if (lastMessage.content[0].type == 'text') {
         textReponse = lastMessage.content[0].text.value;
     }
@@ -73,11 +86,22 @@ export class OpenAIService {
     return textReponse;
   }
 
+  /**
+   * Creates a new OpenAI thread for conversation
+   * @returns Thread ID string
+   */
   private async createThread(): Promise<string> {
     const response = await this.openai.beta.threads.create();
     return response.id;
   }
 
+  /**
+   * Polls for assistant response with retry logic
+   * @param threadId - The thread to check for responses
+   * @param maxRetries - Maximum number of retry attempts
+   * @param retryInterval - Milliseconds between retries
+   * @returns The assistant's response or error message
+   */
   private async waitForResponse(threadId: string, maxRetries = 5, retryInterval = 2000): Promise<string> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       const messages = await this.openai.beta.threads.messages.list(threadId);

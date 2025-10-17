@@ -1,92 +1,185 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# AI Assistant Telegram Bot
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A NestJS-based Telegram bot that integrates with OpenAI's Assistant API to provide intelligent conversational responses. The bot maintains conversation context per user using Redis for thread persistence.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- 🤖 **OpenAI Assistant Integration** - Leverages OpenAI's Assistant API for intelligent responses
+- 💬 **Telegram Bot** - Full-featured Telegram bot using Telegraf
+- 🔄 **Conversation Persistence** - Maintains conversation threads per user with Redis
+- 📝 **Markdown Support** - Formatted responses with Telegram markdown and emojis
+- 🏗️ **Modular Architecture** - Clean separation of concerns with NestJS modules
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Architecture
 
-## Framework Repository
+```
+src/
+├── openai/              # OpenAI Assistant API integration
+│   ├── openai.module.ts
+│   └── openai.service.ts
+├── telegram/            # Telegram bot implementation
+│   ├── telegram.module.ts
+│   └── telegram.service.ts
+├── app.module.ts        # Root application module
+├── app.controller.ts    # Basic HTTP endpoint
+├── app.service.ts       # Application service
+└── main.ts             # Application entry point
+```
 
-This project uses the [NestJS framework](https://github.com/nestjs/nest).
+## Prerequisites
 
-## OpenAI Repository
-
-This project also uses the [OpenAI Node.js client](https://github.com/openai/openai-node).
-
-### Setting Up Environment Variables
-
-To use the OpenAI and Telegram APIs, you need to set up your API keys and assistant ID. Create a `.env` file in the root directory of your project and add the following:
-
-
-OPENAI_API_KEY=your-openai-api-key
-TELEGRAM_BOT_TOKEN=your-telegram-bot-token
-OPENAI_ASSISTANT_ID=your-openai-assistant-id
-ASSISTANT_ID=your-assistant-id
-
+- Node.js (v18 or higher)
+- npm or yarn
+- Redis server running locally or remotely
+- OpenAI API key
+- Telegram Bot Token (from [@BotFather](https://t.me/botfather))
+- OpenAI Assistant ID
 
 ## Installation
 
+```bash
+npm install
+```
 
-$ npm install
+## Configuration
 
+Create a `.env` file in the root directory with the following environment variables:
 
-## Running the app
+```env
+# OpenAI Configuration
+OPENAI_API_KEY=your-openai-api-key
+ASSISTANT_ID=your-openai-assistant-id
 
+# Telegram Configuration
+TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+```
 
-# development
-$ npm run start
+### Getting Your Credentials
 
-# watch mode
-$ npm run start:dev
+1. **OpenAI API Key**: Get from [OpenAI Platform](https://platform.openai.com/api-keys)
+2. **OpenAI Assistant ID**: Create an assistant in [OpenAI Playground](https://platform.openai.com/playground) and copy its ID
+3. **Telegram Bot Token**: Message [@BotFather](https://t.me/botfather) on Telegram and create a new bot
 
-# production mode
-$ npm run start:prod
+## Running the Application
 
+### Development Mode
 
-## Test
+```bash
+npm run start:dev
+```
 
+### Production Mode
 
-# unit tests
-$ npm run test
+```bash
+npm run build
+npm run start:prod
+```
 
-# e2e tests
-$ npm run test:e2e
+### Debug Mode
 
-# test coverage
-$ npm run test:cov
+```bash
+npm run start:debug
+```
 
+## Usage
 
-## Support
+1. Start the application
+2. Open Telegram and find your bot
+3. Send any text message to the bot
+4. The bot will forward your message to the OpenAI assistant and reply with the response
+5. Conversation context is maintained per user automatically
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## How It Works
 
-## Stay in touch
+1. **Message Reception**: User sends a message via Telegram
+2. **User Identification**: Bot extracts user ID and retrieves/creates an OpenAI thread
+3. **Thread Persistence**: Thread ID is stored in Redis for future conversations
+4. **OpenAI Processing**: Message is sent to OpenAI Assistant API
+5. **Response Retrieval**: Bot polls for completion and retrieves the response
+6. **Reply**: Response is sent back to the user on Telegram
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Testing
+
+```bash
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
+```
+
+## Code Quality
+
+```bash
+# Lint
+npm run lint
+
+# Format code
+npm run format
+```
+
+## API Endpoints
+
+- `GET /` - Health check endpoint returning "Hello World!"
+
+The application runs on port **3030** by default.
+
+## Technology Stack
+
+- **Framework**: NestJS 10.x
+- **Language**: TypeScript
+- **Bot Library**: Telegraf 4.x
+- **AI Integration**: OpenAI Node.js SDK 4.x
+- **Data Store**: Redis 4.x
+- **HTTP Client**: Axios (via @nestjs/axios)
+- **WebSockets**: Socket.io (via @nestjs/platform-socket.io)
+
+## Project Structure
+
+- **OpenAI Module**: Manages OpenAI client initialization, thread creation, message sending, and response polling
+- **Telegram Module**: Handles Telegram bot setup, message reception, and response forwarding
+- **Config Module**: Global configuration management using @nestjs/config
+- **Redis**: Stores user-to-thread mappings for conversation continuity
+
+## Development
+
+### Adding New Features
+
+1. Create a new module: `nest generate module feature-name`
+2. Add services: `nest generate service feature-name`
+3. Import the module in `app.module.ts`
+
+### Environment Variables
+
+All configuration is managed through environment variables loaded via `@nestjs/config`. Add new variables to your `.env` file and access them using `ConfigService`.
+
+## Troubleshooting
+
+### Redis Connection Issues
+- Ensure Redis server is running: `redis-cli ping` should return `PONG`
+- Check Redis connection settings if using remote server
+
+### Bot Not Responding
+- Verify `TELEGRAM_BOT_TOKEN` is correct
+- Check bot is not blocked by user
+- Ensure OpenAI API key is valid
+
+### OpenAI Errors
+- Verify `OPENAI_API_KEY` has sufficient credits
+- Check `ASSISTANT_ID` is valid and accessible
+- Review OpenAI API status at [status.openai.com](https://status.openai.com)
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+UNLICENSED - Private project
+
+## Contributing
+
+This is a private project. For questions or contributions, contact the repository owner.
+
+---
+
+Built with [NestJS](https://nestjs.com/) | Powered by [OpenAI](https://openai.com/) | Chat via [Telegram](https://telegram.org/)
